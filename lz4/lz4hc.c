@@ -118,21 +118,25 @@
 //**************************************
 #if defined(_MSC_VER)    // Visual Studio does not support 'stdint' natively
 #define BYTE	unsigned __int8
-#define U16		unsigned __int16
-#define U32		unsigned __int32
-#define S32		__int32
-#define U64		unsigned __int64
+#define U16	unsigned __int16
+#define U32	unsigned __int32
+#define S32	__int32
+#define U64	unsigned __int64
 #else
 #include <stdint.h>
 #define BYTE	uint8_t
-#define U16		uint16_t
-#define U32		uint32_t
-#define S32		int32_t
-#define U64		uint64_t
+#define U16	uint16_t
+#define U32	uint32_t
+#define S32	int32_t
+#define U64	uint64_t
 #endif
 
 #ifndef LZ4_FORCE_UNALIGNED_ACCESS
+#ifdef __SUNPRO_C
+#pragma pack(1)
+#else
 #pragma pack(push, 1) 
+#endif
 #endif
 
 typedef struct _U16_S { U16 v; } U16_S;
@@ -140,7 +144,11 @@ typedef struct _U32_S { U32 v; } U32_S;
 typedef struct _U64_S { U64 v; } U64_S;
 
 #ifndef LZ4_FORCE_UNALIGNED_ACCESS
+#ifdef __SUNPRO_C
+#pragma pack()
+#else
 #pragma pack(pop) 
+#endif
 #endif
 
 #define A64(x) (((U64_S *)(x))->v)

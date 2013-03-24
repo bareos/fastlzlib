@@ -62,25 +62,25 @@
 //**************************************
 // 32 or 64 bits ?
 #if (defined(__x86_64__) || defined(__x86_64) || defined(__amd64__) || defined(__amd64) || defined(__ppc64__) || defined(_WIN64) || defined(__LP64__) || defined(_LP64) )   // Detects 64 bits mode
-#  define LZ4_ARCH64 1
+#define LZ4_ARCH64 1
 #else
-#  define LZ4_ARCH64 0
+#define LZ4_ARCH64 0
 #endif
 
 // Little Endian or Big Endian ?
 // Overwrite the #define below if you know your architecture endianess
 #if defined (__GLIBC__)
-#  include <endian.h>
-#  if (__BYTE_ORDER == __BIG_ENDIAN)
-#     define LZ4_BIG_ENDIAN 1
-#  endif
+#include <endian.h>
+#if (__BYTE_ORDER == __BIG_ENDIAN)
+#define LZ4_BIG_ENDIAN 1
+#endif
 #elif (defined(__BIG_ENDIAN__) || defined(__BIG_ENDIAN) || defined(_BIG_ENDIAN)) && !(defined(__LITTLE_ENDIAN__) || defined(__LITTLE_ENDIAN) || defined(_LITTLE_ENDIAN))
-#  define LZ4_BIG_ENDIAN 1
+#define LZ4_BIG_ENDIAN 1
 #elif defined(__sparc) || defined(__sparc__) \
    || defined(__ppc__) || defined(_POWER) || defined(__powerpc__) || defined(_ARCH_PPC) || defined(__PPC__) || defined(__PPC) || defined(PPC) || defined(__powerpc__) || defined(__powerpc) || defined(powerpc) \
    || defined(__hpux)  || defined(__hppa) \
    || defined(_MIPSEB) || defined(__s390__)
-#  define LZ4_BIG_ENDIAN 1
+#define LZ4_BIG_ENDIAN 1
 #else
 // Little Endian assumed. PDP Endian and other very rare endian format are unsupported.
 #endif
@@ -89,12 +89,12 @@
 // For others CPU, the compiler will be more cautious, and insert extra code to ensure aligned access is respected
 // If you know your target CPU supports unaligned memory access, you want to force this option manually to improve performance
 #if defined(__ARM_FEATURE_UNALIGNED)
-#  define LZ4_FORCE_UNALIGNED_ACCESS 1
+#define LZ4_FORCE_UNALIGNED_ACCESS 1
 #endif
 
 // Define this parameter if your target system or compiler does not support hardware bit count
 #if defined(_MSC_VER) && defined(_WIN32_WCE)            // Visual Studio for Windows CE does not support Hardware bit count
-#  define LZ4_FORCE_SW_BITCOUNT
+#define LZ4_FORCE_SW_BITCOUNT
 #endif
 
 
@@ -110,26 +110,26 @@
 #define GCC_VERSION (__GNUC__ * 100 + __GNUC_MINOR__)
 
 #ifdef _MSC_VER  // Visual Studio
-#  include <intrin.h>   // For Visual 2005
-#  if LZ4_ARCH64	// 64-bit
-#    pragma intrinsic(_BitScanForward64) // For Visual 2005
-#    pragma intrinsic(_BitScanReverse64) // For Visual 2005
-#  else
-#    pragma intrinsic(_BitScanForward)   // For Visual 2005
-#    pragma intrinsic(_BitScanReverse)   // For Visual 2005
-#  endif
+#include <intrin.h>   // For Visual 2005
+#if LZ4_ARCH64	// 64-bit
+#pragma intrinsic(_BitScanForward64) // For Visual 2005
+#pragma intrinsic(_BitScanReverse64) // For Visual 2005
+#else
+#pragma intrinsic(_BitScanForward)   // For Visual 2005
+#pragma intrinsic(_BitScanReverse)   // For Visual 2005
+#endif
 #endif
 
 #ifdef _MSC_VER
-#  define lz4_bswap16(x) _byteswap_ushort(x)
+#define lz4_bswap16(x) _byteswap_ushort(x)
 #else
-#  define lz4_bswap16(x) ((unsigned short int) ((((x) >> 8) & 0xffu) | (((x) & 0xffu) << 8)))
+#define lz4_bswap16(x) ((unsigned short int) ((((x) >> 8) & 0xffu) | (((x) & 0xffu) << 8)))
 #endif
 
 #if (GCC_VERSION >= 302) || (__INTEL_COMPILER >= 800) || defined(__clang__)
-#  define expect(expr,value)    (__builtin_expect ((expr),(value)) )
+#define expect(expr,value)    (__builtin_expect ((expr),(value)) )
 #else
-#  define expect(expr,value)    (expr)
+#define expect(expr,value)    (expr)
 #endif
 
 #define likely(expr)     expect((expr) != 0, 1)
@@ -148,22 +148,26 @@
 // Basic Types
 //**************************************
 #if defined(_MSC_VER)    // Visual Studio does not support 'stdint' natively
-#  define BYTE	unsigned __int8
-#  define U16		unsigned __int16
-#  define U32		unsigned __int32
-#  define S32		__int32
-#  define U64		unsigned __int64
+#define BYTE	unsigned __int8
+#define U16	unsigned __int16
+#define U32	unsigned __int32
+#define S32	__int32
+#define U64	unsigned __int64
 #else
-#  include <stdint.h>
-#  define BYTE	uint8_t
-#  define U16		uint16_t
-#  define U32		uint32_t
-#  define S32		int32_t
-#  define U64		uint64_t
+#include <stdint.h>
+#define BYTE	uint8_t
+#define U16	uint16_t
+#define U32	uint32_t
+#define S32	int32_t
+#define U64	uint64_t
 #endif
 
 #ifndef LZ4_FORCE_UNALIGNED_ACCESS
-#  pragma pack(push, 1)
+#ifdef __SUNPRO_C
+#pragma pack(1)
+#else
+#pragma pack(push, 1)
+#endif
 #endif
 
 typedef struct _U16_S { U16 v; } U16_S;
@@ -171,7 +175,11 @@ typedef struct _U32_S { U32 v; } U32_S;
 typedef struct _U64_S { U64 v; } U64_S;
 
 #ifndef LZ4_FORCE_UNALIGNED_ACCESS
-#  pragma pack(pop)
+#ifdef __SUNPRO_C
+#pragma pack()
+#else
+#pragma pack(pop)
+#endif
 #endif
 
 #define A64(x) (((U64_S *)(x))->v)
@@ -209,31 +217,31 @@ typedef struct _U64_S { U64 v; } U64_S;
 // Architecture-specific macros
 //**************************************
 #if LZ4_ARCH64	// 64-bit
-#  define STEPSIZE 8
-#  define UARCH U64
-#  define AARCH A64
-#  define LZ4_COPYSTEP(s,d)       A64(d) = A64(s); d+=8; s+=8;
-#  define LZ4_COPYPACKET(s,d)     LZ4_COPYSTEP(s,d)
-#  define LZ4_SECURECOPY(s,d,e)   if (d<e) LZ4_WILDCOPY(s,d,e)
-#  define HTYPE                   U32
-#  define INITBASE(base)          const BYTE* const base = ip
+#define STEPSIZE 8
+#define UARCH U64
+#define AARCH A64
+#define LZ4_COPYSTEP(s,d)       A64(d) = A64(s); d+=8; s+=8;
+#define LZ4_COPYPACKET(s,d)     LZ4_COPYSTEP(s,d)
+#define LZ4_SECURECOPY(s,d,e)   if (d<e) LZ4_WILDCOPY(s,d,e)
+#define HTYPE                   U32
+#define INITBASE(base)          const BYTE* const base = ip
 #else		// 32-bit
-#  define STEPSIZE 4
-#  define UARCH U32
-#  define AARCH A32
-#  define LZ4_COPYSTEP(s,d)       A32(d) = A32(s); d+=4; s+=4;
-#  define LZ4_COPYPACKET(s,d)     LZ4_COPYSTEP(s,d); LZ4_COPYSTEP(s,d);
-#  define LZ4_SECURECOPY          LZ4_WILDCOPY
-#  define HTYPE                   const BYTE*
-#  define INITBASE(base)          const int base = 0
+#define STEPSIZE 4
+#define UARCH U32
+#define AARCH A32
+#define LZ4_COPYSTEP(s,d)       A32(d) = A32(s); d+=4; s+=4;
+#define LZ4_COPYPACKET(s,d)     LZ4_COPYSTEP(s,d); LZ4_COPYSTEP(s,d);
+#define LZ4_SECURECOPY          LZ4_WILDCOPY
+#define HTYPE                   const BYTE*
+#define INITBASE(base)          const int base = 0
 #endif
 
 #if (defined(LZ4_BIG_ENDIAN) && !defined(BIG_ENDIAN_NATIVE_BUT_INCOMPATIBLE))
-#  define LZ4_READ_LITTLEENDIAN_16(d,s,p) { U16 v = A16(p); v = lz4_bswap16(v); d = (s) - v; }
-#  define LZ4_WRITE_LITTLEENDIAN_16(p,i)  { U16 v = (U16)(i); v = lz4_bswap16(v); A16(p) = v; p+=2; }
+#define LZ4_READ_LITTLEENDIAN_16(d,s,p) { U16 v = A16(p); v = lz4_bswap16(v); d = (s) - v; }
+#define LZ4_WRITE_LITTLEENDIAN_16(p,i)  { U16 v = (U16)(i); v = lz4_bswap16(v); A16(p) = v; p+=2; }
 #else		// Little Endian
-#  define LZ4_READ_LITTLEENDIAN_16(d,s,p) { d = (s) - A16(p); }
-#  define LZ4_WRITE_LITTLEENDIAN_16(p,v)  { A16(p) = v; p+=2; }
+#define LZ4_READ_LITTLEENDIAN_16(d,s,p) { d = (s) - A16(p); }
+#define LZ4_WRITE_LITTLEENDIAN_16(p,v)  { A16(p) = v; p+=2; }
 #endif
 
 
