@@ -32,9 +32,9 @@
 /* extracted from fastlz.h */
 #define FASTLZ_VERSION_STRING "0.1.0"
 
-/* optional conf.h file if build with -DFASTLZ_INCLUDE_CONF_H */
-#ifdef FASTLZ_INCLUDE_CONF_H
-#include "conf.h"
+/* optional conf.h file if build with -DFASTLZ_INCLUDE_CONFIG_H */
+#ifdef FASTLZ_INCLUDE_CONFIG_H
+#include "config.h"
 #endif
 #ifndef ZFASTEXTERN
 #ifdef _WIN32
