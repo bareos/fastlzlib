@@ -17,7 +17,7 @@ Stream description
 Streams are made of contiguous compressed blocks, terminated by an empty
 compressed block (which is an EOF marker).
 
-Each compressed block has an header at the begining, little endian, 
+Each compressed block has an header at the begining, little endian,
 
 #define BLOCK_TYPE_RAW         0x1
 #define BLOCK_TYPE_COMPRESSED  0xc
