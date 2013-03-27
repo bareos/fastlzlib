@@ -41,14 +41,6 @@
 // Default value is 14, for 16KB, which nicely fits into Intel x86 L1 cache
 #define MEMORY_USAGE 14
 
-// NOTCOMPRESSIBLE_DETECTIONLEVEL :
-// Decreasing this value will make the algorithm skip faster data segments considered "incompressible"
-// This may decrease compression ratio dramatically, but will be faster on incompressible data
-// Increasing this value will make the algorithm search more before declaring a segment "incompressible"
-// This could improve compression a bit, but will be slower on incompressible data
-// The default value (6) is recommended
-#define NOTCOMPRESSIBLE_DETECTIONLEVEL 6
-
 // BIG_ENDIAN_NATIVE_BUT_INCOMPATIBLE :
 // This will provide a small boost to performance for big endian cpu, but the resulting compressed stream will be incompatible with little-endian CPU.
 // You can set this option to 1 in situations where data will remain within closed environment
@@ -62,25 +54,25 @@
 //**************************************
 // 32 or 64 bits ?
 #if (defined(__x86_64__) || defined(__x86_64) || defined(__amd64__) || defined(__amd64) || defined(__ppc64__) || defined(_WIN64) || defined(__LP64__) || defined(_LP64) )   // Detects 64 bits mode
-#define LZ4_ARCH64 1
+#  define LZ4_ARCH64 1
 #else
-#define LZ4_ARCH64 0
+#  define LZ4_ARCH64 0
 #endif
 
 // Little Endian or Big Endian ?
 // Overwrite the #define below if you know your architecture endianess
 #if defined (__GLIBC__)
-#include <endian.h>
-#if (__BYTE_ORDER == __BIG_ENDIAN)
-#define LZ4_BIG_ENDIAN 1
-#endif
+#  include <endian.h>
+#  if (__BYTE_ORDER == __BIG_ENDIAN)
+#     define LZ4_BIG_ENDIAN 1
+#  endif
 #elif (defined(__BIG_ENDIAN__) || defined(__BIG_ENDIAN) || defined(_BIG_ENDIAN)) && !(defined(__LITTLE_ENDIAN__) || defined(__LITTLE_ENDIAN) || defined(_LITTLE_ENDIAN))
-#define LZ4_BIG_ENDIAN 1
+#  define LZ4_BIG_ENDIAN 1
 #elif defined(__sparc) || defined(__sparc__) \
    || defined(__ppc__) || defined(_POWER) || defined(__powerpc__) || defined(_ARCH_PPC) || defined(__PPC__) || defined(__PPC) || defined(PPC) || defined(__powerpc__) || defined(__powerpc) || defined(powerpc) \
    || defined(__hpux)  || defined(__hppa) \
    || defined(_MIPSEB) || defined(__s390__)
-#define LZ4_BIG_ENDIAN 1
+#  define LZ4_BIG_ENDIAN 1
 #else
 // Little Endian assumed. PDP Endian and other very rare endian format are unsupported.
 #endif
@@ -89,12 +81,12 @@
 // For others CPU, the compiler will be more cautious, and insert extra code to ensure aligned access is respected
 // If you know your target CPU supports unaligned memory access, you want to force this option manually to improve performance
 #if defined(__ARM_FEATURE_UNALIGNED)
-#define LZ4_FORCE_UNALIGNED_ACCESS 1
+#  define LZ4_FORCE_UNALIGNED_ACCESS 1
 #endif
 
 // Define this parameter if your target system or compiler does not support hardware bit count
 #if defined(_MSC_VER) && defined(_WIN32_WCE)            // Visual Studio for Windows CE does not support Hardware bit count
-#define LZ4_FORCE_SW_BITCOUNT
+#  define LZ4_FORCE_SW_BITCOUNT
 #endif
 
 
@@ -110,26 +102,26 @@
 #define GCC_VERSION (__GNUC__ * 100 + __GNUC_MINOR__)
 
 #ifdef _MSC_VER  // Visual Studio
-#include <intrin.h>   // For Visual 2005
-#if LZ4_ARCH64	// 64-bit
-#pragma intrinsic(_BitScanForward64) // For Visual 2005
-#pragma intrinsic(_BitScanReverse64) // For Visual 2005
-#else
-#pragma intrinsic(_BitScanForward)   // For Visual 2005
-#pragma intrinsic(_BitScanReverse)   // For Visual 2005
-#endif
+#  include <intrin.h>   // For Visual 2005
+#  if LZ4_ARCH64	// 64-bit
+#    pragma intrinsic(_BitScanForward64) // For Visual 2005
+#    pragma intrinsic(_BitScanReverse64) // For Visual 2005
+#  else
+#    pragma intrinsic(_BitScanForward)   // For Visual 2005
+#    pragma intrinsic(_BitScanReverse)   // For Visual 2005
+#  endif
 #endif
 
 #ifdef _MSC_VER
-#define lz4_bswap16(x) _byteswap_ushort(x)
+#  define lz4_bswap16(x) _byteswap_ushort(x)
 #else
-#define lz4_bswap16(x) ((unsigned short int) ((((x) >> 8) & 0xffu) | (((x) & 0xffu) << 8)))
+#  define lz4_bswap16(x) ((unsigned short int) ((((x) >> 8) & 0xffu) | (((x) & 0xffu) << 8)))
 #endif
 
 #if (GCC_VERSION >= 302) || (__INTEL_COMPILER >= 800) || defined(__clang__)
-#define expect(expr,value)    (__builtin_expect ((expr),(value)) )
+#  define expect(expr,value)    (__builtin_expect ((expr),(value)) )
 #else
-#define expect(expr,value)    (expr)
+#  define expect(expr,value)    (expr)
 #endif
 
 #define likely(expr)     expect((expr) != 0, 1)
@@ -148,25 +140,25 @@
 // Basic Types
 //**************************************
 #if defined(_MSC_VER)    // Visual Studio does not support 'stdint' natively
-#define BYTE	unsigned __int8
-#define U16	unsigned __int16
-#define U32	unsigned __int32
-#define S32	__int32
-#define U64	unsigned __int64
+#  define BYTE	unsigned __int8
+#  define U16		unsigned __int16
+#  define U32		unsigned __int32
+#  define S32		__int32
+#  define U64		unsigned __int64
 #else
-#include <stdint.h>
-#define BYTE	uint8_t
-#define U16	uint16_t
-#define U32	uint32_t
-#define S32	int32_t
-#define U64	uint64_t
+#  include <stdint.h>
+#  define BYTE	uint8_t
+#  define U16		uint16_t
+#  define U32		uint32_t
+#  define S32		int32_t
+#  define U64		uint64_t
 #endif
 
 #ifndef LZ4_FORCE_UNALIGNED_ACCESS
 #ifdef __SUNPRO_C
-#pragma pack(1)
+#  pragma pack(1)
 #else
-#pragma pack(push, 1)
+#  pragma pack(push, 1)
 #endif
 #endif
 
@@ -176,9 +168,9 @@ typedef struct _U64_S { U64 v; } U64_S;
 
 #ifndef LZ4_FORCE_UNALIGNED_ACCESS
 #ifdef __SUNPRO_C
-#pragma pack()
+#  pragma pack()
 #else
-#pragma pack(pop)
+#  pragma pack(pop)
 #endif
 #endif
 
@@ -196,6 +188,13 @@ typedef struct _U64_S { U64 v; } U64_S;
 #define HASHTABLESIZE (1 << HASH_LOG)
 #define HASH_MASK (HASHTABLESIZE - 1)
 
+// NOTCOMPRESSIBLE_DETECTIONLEVEL :
+// Decreasing this value will make the algorithm skip faster data segments considered "incompressible"
+// This may decrease compression ratio dramatically, but will be faster on incompressible data
+// Increasing this value will make the algorithm search more before declaring a segment "incompressible"
+// This could improve compression a bit, but will be slower on incompressible data
+// The default value (6) is recommended
+#define NOTCOMPRESSIBLE_DETECTIONLEVEL 6
 #define SKIPSTRENGTH (NOTCOMPRESSIBLE_DETECTIONLEVEL>2?NOTCOMPRESSIBLE_DETECTIONLEVEL:2)
 #define STACKLIMIT 13
 #define HEAPMODE (HASH_LOG>STACKLIMIT)  // Defines if memory is allocated into the stack (local variable), or into the heap (malloc()).
@@ -217,31 +216,31 @@ typedef struct _U64_S { U64 v; } U64_S;
 // Architecture-specific macros
 //**************************************
 #if LZ4_ARCH64	// 64-bit
-#define STEPSIZE 8
-#define UARCH U64
-#define AARCH A64
-#define LZ4_COPYSTEP(s,d)       A64(d) = A64(s); d+=8; s+=8;
-#define LZ4_COPYPACKET(s,d)     LZ4_COPYSTEP(s,d)
-#define LZ4_SECURECOPY(s,d,e)   if (d<e) LZ4_WILDCOPY(s,d,e)
-#define HTYPE                   U32
-#define INITBASE(base)          const BYTE* const base = ip
+#  define STEPSIZE 8
+#  define UARCH U64
+#  define AARCH A64
+#  define LZ4_COPYSTEP(s,d)       A64(d) = A64(s); d+=8; s+=8;
+#  define LZ4_COPYPACKET(s,d)     LZ4_COPYSTEP(s,d)
+#  define LZ4_SECURECOPY(s,d,e)   if (d<e) LZ4_WILDCOPY(s,d,e)
+#  define HTYPE                   U32
+#  define INITBASE(base)          const BYTE* const base = ip
 #else		// 32-bit
-#define STEPSIZE 4
-#define UARCH U32
-#define AARCH A32
-#define LZ4_COPYSTEP(s,d)       A32(d) = A32(s); d+=4; s+=4;
-#define LZ4_COPYPACKET(s,d)     LZ4_COPYSTEP(s,d); LZ4_COPYSTEP(s,d);
-#define LZ4_SECURECOPY          LZ4_WILDCOPY
-#define HTYPE                   const BYTE*
-#define INITBASE(base)          const int base = 0
+#  define STEPSIZE 4
+#  define UARCH U32
+#  define AARCH A32
+#  define LZ4_COPYSTEP(s,d)       A32(d) = A32(s); d+=4; s+=4;
+#  define LZ4_COPYPACKET(s,d)     LZ4_COPYSTEP(s,d); LZ4_COPYSTEP(s,d);
+#  define LZ4_SECURECOPY          LZ4_WILDCOPY
+#  define HTYPE                   const BYTE*
+#  define INITBASE(base)          const int base = 0
 #endif
 
 #if (defined(LZ4_BIG_ENDIAN) && !defined(BIG_ENDIAN_NATIVE_BUT_INCOMPATIBLE))
-#define LZ4_READ_LITTLEENDIAN_16(d,s,p) { U16 v = A16(p); v = lz4_bswap16(v); d = (s) - v; }
-#define LZ4_WRITE_LITTLEENDIAN_16(p,i)  { U16 v = (U16)(i); v = lz4_bswap16(v); A16(p) = v; p+=2; }
+#  define LZ4_READ_LITTLEENDIAN_16(d,s,p) { U16 v = A16(p); v = lz4_bswap16(v); d = (s) - v; }
+#  define LZ4_WRITE_LITTLEENDIAN_16(p,i)  { U16 v = (U16)(i); v = lz4_bswap16(v); A16(p) = v; p+=2; }
 #else		// Little Endian
-#define LZ4_READ_LITTLEENDIAN_16(d,s,p) { d = (s) - A16(p); }
-#define LZ4_WRITE_LITTLEENDIAN_16(p,v)  { A16(p) = v; p+=2; }
+#  define LZ4_READ_LITTLEENDIAN_16(d,s,p) { d = (s) - A16(p); }
+#  define LZ4_WRITE_LITTLEENDIAN_16(p,v)  { A16(p) = v; p+=2; }
 #endif
 
 
@@ -317,7 +316,7 @@ static inline int LZ4_NbCommonBytes (register U32 val)
     #endif
 #else
     #if defined(_MSC_VER) && !defined(LZ4_FORCE_SW_BITCOUNT)
-    unsigned long r = 0;
+    unsigned long r;
     _BitScanForward( &r, val );
     return (int)(r>>3);
     #elif defined(__GNUC__) && (GCC_VERSION >= 304) && !defined(LZ4_FORCE_SW_BITCOUNT)
@@ -366,7 +365,7 @@ static inline int LZ4_compressCtx(void** ctx,
     BYTE* op = (BYTE*) dest;
     BYTE* const oend = op + maxOutputSize;
 
-    int len, length;
+    int length;
     const int skipStrength = SKIPSTRENGTH;
     U32 forwardH;
 
@@ -438,7 +437,14 @@ static inline int LZ4_compressCtx(void** ctx,
         }
         else *token = (length<<ML_BITS);
 #else
-        if (length>=(int)RUN_MASK) { *token=(RUN_MASK<<ML_BITS); len = length-RUN_MASK; for(; len > 254 ; len-=255) *op++ = 255; *op++ = (BYTE)len; }
+        if (length>=(int)RUN_MASK) 
+        { 
+            int len;
+            *token=(RUN_MASK<<ML_BITS); 
+            len = length-RUN_MASK; 
+            for(; len > 254 ; len-=255) *op++ = 255; 
+            *op++ = (BYTE)len; 
+        }
         else *token = (length<<ML_BITS);
 #endif
 
@@ -450,7 +456,7 @@ _next_match:
         LZ4_WRITE_LITTLEENDIAN_16(op,(U16)(ip-ref));
 
         // Start Counting
-        ip+=MINMATCH; ref+=MINMATCH;   // MinMatch verified
+        ip+=MINMATCH; ref+=MINMATCH;    // MinMatch already verified
         anchor = ip;
         while likely(ip<matchlimit-(STEPSIZE-1))
         {
@@ -465,10 +471,17 @@ _next_match:
 _endCount:
 
         // Encode MatchLength
-        len = (int)(ip - anchor);
-        if unlikely(op + (1 + LASTLITERALS) + (len>>8) > oend) return 0; 		// Check output limit
-        if (len>=(int)ML_MASK) { *token+=ML_MASK; len-=ML_MASK; for(; len > 509 ; len-=510) { *op++ = 255; *op++ = 255; } if (len > 254) { len-=255; *op++ = 255; } *op++ = (BYTE)len; }
-        else *token += len;
+        length = (int)(ip - anchor);
+        if unlikely(op + (1 + LASTLITERALS) + (length>>8) > oend) return 0; 		// Check output limit
+        if (length>=(int)ML_MASK) 
+        { 
+            *token += ML_MASK; 
+            length -= ML_MASK; 
+            for (; length > 509 ; length-=510) { *op++ = 255; *op++ = 255; } 
+            if (length > 254) { length-=255; *op++ = 255; } 
+            *op++ = (BYTE)length; 
+        }
+        else *token += length;
 
         // Test end of chunk
         if (ip > mflimit) { anchor = ip;  break; }
@@ -721,7 +734,6 @@ int LZ4_uncompress(const char* source,
 
     unsigned token;
 
-    size_t length;
     size_t dec32table[] = {0, 3, 2, 3, 0, 0, 0, 0};
 #if LZ4_ARCH64
     size_t dec64table[] = {0, 0, 0, -1, 0, 1, 2, 3};
@@ -731,13 +743,15 @@ int LZ4_uncompress(const char* source,
     // Main Loop
     while (1)
     {
+        size_t length;
+
         // get runlength
         token = *ip++;
         if ((length=(token>>ML_BITS)) == RUN_MASK)  { size_t len; for (;(len=*ip++)==255;length+=255){} length += len; }
 
         // copy literals
         cpy = op+length;
-        if unlikely(cpy>oend-COPYLENGTH)
+        if (cpy>oend-COPYLENGTH)
         {
             if (cpy != oend) goto _output_error;         // Error : not enough place for another match (min 4) + 5 literals
             memcpy(op, ip, length);
@@ -748,7 +762,7 @@ int LZ4_uncompress(const char* source,
 
         // get offset
         LZ4_READ_LITTLEENDIAN_16(ref,cpy,ip); ip+=2;
-        if unlikely(ref < (BYTE* const)dest) goto _output_error;   // Error : offset create reference outside destination buffer
+        if unlikely(ref < (BYTE* const)dest) goto _output_error;   // Error : offset outside destination buffer
 
         // get matchlength
         if ((length=(token&ML_MASK)) == ML_MASK) { for (;*ip==255;length+=255) {ip++;} length += *ip++; }
@@ -770,16 +784,17 @@ int LZ4_uncompress(const char* source,
             op += STEPSIZE-4; ref -= dec64;
         } else { LZ4_COPYSTEP(ref,op); }
         cpy = op + length - (STEPSIZE-4);
-        if (cpy>oend-COPYLENGTH)
+
+        if unlikely(cpy>oend-(COPYLENGTH)-(STEPSIZE-4))
         {
-            if (cpy > oend) goto _output_error;             // Error : request to write beyond destination buffer
+            if (cpy > oend-LASTLITERALS) goto _output_error;    // Error : last 5 bytes must be literals
             LZ4_SECURECOPY(ref, op, (oend-COPYLENGTH));
             while(op<cpy) *op++=*ref++;
             op=cpy;
-            if (op == oend) goto _output_error;    // Check EOF (should never happen, since last 5 bytes are supposed to be literals)
             continue;
         }
-        LZ4_SECURECOPY(ref, op, cpy);
+        
+        LZ4_WILDCOPY(ref, op, cpy);
         op=cpy;		// correction
     }
 
@@ -813,22 +828,29 @@ int LZ4_uncompress_unknownOutputSize(
 #endif
 
 
+    // Special case
+    if unlikely(ip==iend) goto _output_error;    // A correctly formed null-compressed LZ4 must have at least one byte (token=0)
+
     // Main Loop
-    while (ip<iend)
+    while (1) 
     {
         unsigned token;
         size_t length;
 
         // get runlength
         token = *ip++;
-        if ((length=(token>>ML_BITS)) == RUN_MASK) { int s=255; while ((ip<iend) && (s==255)) { s=*ip++; length += s; } }
+        if ((length=(token>>ML_BITS)) == RUN_MASK) 
+        { 
+            int s=255; 
+            while (likely(ip<iend) && (s==255)) { s=*ip++; length += s; } 
+        }
 
         // copy literals
         cpy = op+length;
-        if ((cpy>oend-COPYLENGTH) || (ip+length>iend-COPYLENGTH))
+        if ((cpy>oend-MFLIMIT) || (ip+length>iend-(2+1+LASTLITERALS)))
         {
             if (cpy > oend) goto _output_error;          // Error : writes beyond output buffer
-            if (ip+length != iend) goto _output_error;   // Error : LZ4 format requires to consume all input at this stage
+            if (ip+length != iend) goto _output_error;   // Error : LZ4 format requires to consume all input at this stage (no match within the last 11 bytes, and at least 8 remaining input bytes for another match+literals)
             memcpy(op, ip, length);
             op += length;
             break;                                       // Necessarily EOF, due to parsing restrictions
@@ -837,10 +859,19 @@ int LZ4_uncompress_unknownOutputSize(
 
         // get offset
         LZ4_READ_LITTLEENDIAN_16(ref,cpy,ip); ip+=2;
-        if (ref < (BYTE* const)dest) goto _output_error;   // Error : offset creates reference outside of destination buffer
+        if unlikely(ref < (BYTE* const)dest) goto _output_error;   // Error : offset outside of destination buffer
 
         // get matchlength
-        if ((length=(token&ML_MASK)) == ML_MASK) { while (ip<iend) { int s = *ip++; length +=s; if (s==255) continue; break; } }
+        if ((length=(token&ML_MASK)) == ML_MASK)    
+        { 
+            while likely(ip<iend-(LASTLITERALS+1))    // Error : a minimum input bytes must remain for LASTLITERALS + token
+            { 
+                int s = *ip++; 
+                length +=s; 
+                if (s==255) continue; 
+                break; 
+            } 
+        }
 
         // copy repeated sequence
         if unlikely(op-ref<STEPSIZE)
@@ -859,16 +890,17 @@ int LZ4_uncompress_unknownOutputSize(
             op += STEPSIZE-4; ref -= dec64;
         } else { LZ4_COPYSTEP(ref,op); }
         cpy = op + length - (STEPSIZE-4);
-        if (cpy>oend-COPYLENGTH)
+
+        if unlikely(cpy>oend-(COPYLENGTH+(STEPSIZE-4)))
         {
-            if (cpy > oend) goto _output_error;    // Error : request to write outside of destination buffer
+            if (cpy > oend-LASTLITERALS) goto _output_error;    // Error : last 5 bytes must be literals
             LZ4_SECURECOPY(ref, op, (oend-COPYLENGTH));
             while(op<cpy) *op++=*ref++;
             op=cpy;
-            if (op == oend) goto _output_error;    // Check EOF (should never happen, since last 5 bytes are supposed to be literals)
             continue;
         }
-        LZ4_SECURECOPY(ref, op, cpy);
+
+        LZ4_WILDCOPY(ref, op, cpy);
         op=cpy;		// correction
     }
 

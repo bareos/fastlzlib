@@ -300,4 +300,5 @@ ZFASTEXTERN int fastlzlibDecompressMemory(zfast_stream *s);
 #if defined (__cplusplus)
 }
 #endif
+
 #endif
