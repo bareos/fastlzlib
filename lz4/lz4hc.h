@@ -44,7 +44,7 @@ extern "C" {
 #endif
 #ifndef ZFASTEXTERN
 #ifdef _WIN32
-#ifdef FASTLZ_DLL
+#if defined(FASTLZ_DLL) || defined(DLL_EXPORT)
 #define ZFASTEXTERN __declspec(dllexport)
 #else
 #define ZFASTEXTERN __declspec(dllimport)
