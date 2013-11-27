@@ -436,7 +436,7 @@ clean-binPROGRAMS:
 	rm -f $$list
 fastlzcat$(EXEEXT): $(fastlzcat_OBJECTS) $(fastlzcat_DEPENDENCIES) $(EXTRA_fastlzcat_DEPENDENCIES)
 	@rm -f fastlzcat$(EXEEXT)
-	$(LINK) $(fastlzcat_OBJECTS) $(fastlzcat_LDADD) $(LIBS)
+	$(LINK) -rpath $(libdir) $(fastlzcat_OBJECTS) $(fastlzcat_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
