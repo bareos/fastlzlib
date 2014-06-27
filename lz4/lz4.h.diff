@@ -1,5 +1,5 @@
---- lz4.h.orig	2014-05-15 10:22:08.197744000 +0200
-+++ lz4.h	2014-05-15 10:24:15.121357000 +0200
+--- lz4.h.orig	2014-06-27 12:54:42.010464327 +0200
++++ lz4.h	2014-06-27 12:58:16.584427101 +0200
 @@ -37,6 +37,23 @@
  extern "C" {
  #endif
@@ -10,7 +10,7 @@
 +#endif
 +#ifndef ZFASTEXTERN
 +#ifdef _WIN32
-+#ifdef FASTLZ_DLL
++#if defined(FASTLZ_DLL) || defined(DLL_EXPORT)
 +#define ZFASTEXTERN __declspec(dllexport)
 +#else
 +#define ZFASTEXTERN __declspec(dllimport)
@@ -24,33 +24,18 @@
  
  /**************************************
     Version
-@@ -49,8 +66,12 @@
- /**************************************
-    Compiler Options
- **************************************/
--#if (defined(__GNUC__) && defined(__STRICT_ANSI__)) || (defined(_MSC_VER) && !defined(__cplusplus))   /* Visual Studio */
--#  define inline __inline           /* Visual C is not C99, but supports some kind of inline */
-+#ifndef LZ4_INCLUDE_CONF_H
-+  /* Visual Studio */
-+#if ((defined(_MSC_VER)) && (!defined(__cplusplus)))
-+#  undef ZFASTINLINE
-+#  define ZFASTINLINE __inline           // Visual is not C99, but supports some kind of inline
-+#endif
- #endif
- 
- 
-@@ -58,8 +79,8 @@
+@@ -63,8 +80,8 @@
     Simple Functions
  **************************************/
  
 -int LZ4_compress        (const char* source, char* dest, int inputSize);
--int LZ4_decompress_safe (const char* source, char* dest, int inputSize, int maxOutputSize);
+-int LZ4_decompress_safe (const char* source, char* dest, int compressedSize, int maxOutputSize);
 +ZFASTEXTERN int LZ4_compress        (const char* source, char* dest, int inputSize);
-+ZFASTEXTERN int LZ4_decompress_safe (const char* source, char* dest, int inputSize, int maxOutputSize);
++ZFASTEXTERN int LZ4_decompress_safe (const char* source, char* dest, int compressedSize, int maxOutputSize);
  
  /*
  LZ4_compress() :
-@@ -96,7 +117,7 @@
+@@ -111,7 +128,7 @@
      return : maximum output size in a "worst case" scenario
               or 0, if input size is too large ( > LZ4_MAX_INPUT_SIZE)
  */
@@ -59,7 +44,7 @@
  
  
  /*
-@@ -110,7 +131,7 @@
+@@ -125,7 +142,7 @@
      return : the number of bytes written in buffer 'dest'
               or 0 if the compression fails
  */
@@ -68,28 +53,121 @@
  
  
  /*
-@@ -123,7 +144,7 @@
-            Use this function preferably into a trusted environment (data to decode comes from a trusted source).
-            Destination buffer must be already allocated. Its size must be a minimum of 'outputSize' bytes.
+@@ -139,7 +156,7 @@
+            It does not provide full protection against intentionnally modified data stream.
+            Use this function in a trusted environment (data to decode comes from a trusted source).
  */
 -int LZ4_decompress_fast (const char* source, char* dest, int originalSize);
 +ZFASTEXTERN int LZ4_decompress_fast (const char* source, char* dest, int originalSize);
  
  
  /*
-@@ -138,7 +159,7 @@
+@@ -154,7 +171,7 @@
               If the source stream is detected malformed, the function will stop decoding and return a negative result.
               This function never writes outside of output buffer, and never reads outside of input buffer. It is therefore protected against malicious data packets
  */
--int LZ4_decompress_safe_partial (const char* source, char* dest, int inputSize, int targetOutputSize, int maxOutputSize);
-+ZFASTEXTERN int LZ4_decompress_safe_partial (const char* source, char* dest, int inputSize, int targetOutputSize, int maxOutputSize);
+-int LZ4_decompress_safe_partial (const char* source, char* dest, int compressedSize, int targetOutputSize, int maxOutputSize);
++ZFASTEXTERN int LZ4_decompress_safe_partial (const char* source, char* dest, int compressedSize, int targetOutputSize, int maxOutputSize);
+ 
+ 
+ /***********************************************
+@@ -176,8 +193,8 @@
+  * provides a pointer (void*) towards an initialized LZ4_stream_t structure.
+  * LZ4_free just frees it.
+  */
+-void* LZ4_createStream();
+-int   LZ4_free (void* LZ4_stream);
++ZFASTEXTERN void* LZ4_createStream();
++ZFASTEXTERN int   LZ4_free (void* LZ4_stream);
  
  
  /*
-@@ -152,19 +173,19 @@
- LZ4_compress_withState() and LZ4_compress_limitedOutput_withState() are equivalent to previously described functions.
- They just use the externally allocated memory area instead of allocating their own (on stack, or on heap).
+@@ -187,21 +204,21 @@
+  * Loading a size of 0 is allowed (same effect as init).
+  * Return : 1 if OK, 0 if error
+  */
+-int LZ4_loadDict (void* LZ4_stream, const char* dictionary, int dictSize);
++ZFASTEXTERN int LZ4_loadDict (void* LZ4_stream, const char* dictionary, int dictSize);
+ 
+ /*
+  * LZ4_compress_continue
+  * Compress data block 'source', using blocks compressed before as dictionary to improve compression ratio
+  * Previous data blocks are assumed to still be present at their previous location.
+  */
+-int LZ4_compress_continue (void* LZ4_stream, const char* source, char* dest, int inputSize);
++ZFASTEXTERN int LZ4_compress_continue (void* LZ4_stream, const char* source, char* dest, int inputSize);
+ 
+ /*
+  * LZ4_compress_limitedOutput_continue
+  * Same as before, but also specify a maximum target compressed size (maxOutputSize)
+  * If objective cannot be met, compression exits, and returns a zero.
+  */
+-int LZ4_compress_limitedOutput_continue (void* LZ4_stream, const char* source, char* dest, int inputSize, int maxOutputSize);
++ZFASTEXTERN int LZ4_compress_limitedOutput_continue (void* LZ4_stream, const char* source, char* dest, int inputSize, int maxOutputSize);
+ 
+ /*
+  * LZ4_saveDict
+@@ -212,7 +229,7 @@
+  * Return : 1 if OK, 0 if error
+  * Note : any dictSize > 64 KB will be interpreted as 64KB.
+  */
+-int LZ4_saveDict (void* LZ4_stream, char* safeBuffer, int dictSize);
++ZFASTEXTERN int LZ4_saveDict (void* LZ4_stream, char* safeBuffer, int dictSize);
+ 
+ 
+ /************************************************
+@@ -234,8 +251,8 @@
+  * provides a pointer (void*) towards an initialized LZ4_streamDecode_t structure.
+  * LZ4_free just frees it.
+  */
+-void* LZ4_createStreamDecode();
+-int   LZ4_free (void* LZ4_stream);   /* yes, it's the same one as for compression */
++ZFASTEXTERN void* LZ4_createStreamDecode();
++ZFASTEXTERN int   LZ4_free (void* LZ4_stream);   /* yes, it's the same one as for compression */
+ 
+ /*
+ *_continue() :
+@@ -244,8 +261,8 @@
+     If it's not possible, save the relevant part of decoded data into a safe buffer,
+     and indicate where it stands using LZ4_setDictDecode()
  */
+-int LZ4_decompress_safe_continue (void* LZ4_streamDecode, const char* source, char* dest, int compressedSize, int maxOutputSize);
+-int LZ4_decompress_fast_continue (void* LZ4_streamDecode, const char* source, char* dest, int originalSize);
++ZFASTEXTERN int LZ4_decompress_safe_continue (void* LZ4_streamDecode, const char* source, char* dest, int compressedSize, int maxOutputSize);
++ZFASTEXTERN int LZ4_decompress_fast_continue (void* LZ4_streamDecode, const char* source, char* dest, int originalSize);
+ 
+ /*
+  * LZ4_setDictDecode
+@@ -255,7 +272,7 @@
+  * Setting a size of 0 is allowed (same effect as no dictionary).
+  * Return : 1 if OK, 0 if error
+  */
+-int LZ4_setDictDecode (void* LZ4_streamDecode, const char* dictionary, int dictSize);
++ZFASTEXTERN int LZ4_setDictDecode (void* LZ4_streamDecode, const char* dictionary, int dictSize);
+ 
+ 
+ /*
+@@ -266,8 +283,8 @@
+     all together into a single function call.
+     It doesn't use nor update an LZ4_streamDecode_t structure.
+ */
+-int LZ4_decompress_safe_usingDict (const char* source, char* dest, int compressedSize, int maxOutputSize, const char* dictStart, int dictSize);
+-int LZ4_decompress_fast_usingDict (const char* source, char* dest, int originalSize, const char* dictStart, int dictSize);
++ZFASTEXTERN int LZ4_decompress_safe_usingDict (const char* source, char* dest, int compressedSize, int maxOutputSize, const char* dictStart, int dictSize);
++ZFASTEXTERN int LZ4_decompress_fast_usingDict (const char* source, char* dest, int originalSize, const char* dictStart, int dictSize);
+ 
+ 
+ 
+@@ -282,23 +299,23 @@
+ - LZ4_uncompress is the same as LZ4_decompress_fast
+ - LZ4_uncompress_unknownOutputSize is the same as LZ4_decompress_safe
+ */
+-int LZ4_uncompress (const char* source, char* dest, int outputSize);
+-int LZ4_uncompress_unknownOutputSize (const char* source, char* dest, int isize, int maxOutputSize);
++ZFASTEXTERN int LZ4_uncompress (const char* source, char* dest, int outputSize);
++ZFASTEXTERN int LZ4_uncompress_unknownOutputSize (const char* source, char* dest, int isize, int maxOutputSize);
+ 
+ /* Obsolete functions for externally allocated state; use streaming interface instead */
 -int LZ4_sizeofState(void);
 -int LZ4_compress_withState               (void* state, const char* source, char* dest, int inputSize);
 -int LZ4_compress_limitedOutput_withState (void* state, const char* source, char* dest, int inputSize, int maxOutputSize);
@@ -97,53 +175,21 @@
 +ZFASTEXTERN int LZ4_compress_withState               (void* state, const char* source, char* dest, int inputSize);
 +ZFASTEXTERN int LZ4_compress_limitedOutput_withState (void* state, const char* source, char* dest, int inputSize, int maxOutputSize);
  
- 
- /**************************************
-    Streaming Functions
- **************************************/
+ /* Obsolete streaming functions; use new streaming interface whenever possible */
 -void* LZ4_create (const char* inputBuffer);
--int   LZ4_compress_continue (void* LZ4_Data, const char* source, char* dest, int inputSize);
--int   LZ4_compress_limitedOutput_continue (void* LZ4_Data, const char* source, char* dest, int inputSize, int maxOutputSize);
--char* LZ4_slideInputBuffer (void* LZ4_Data);
--int   LZ4_free (void* LZ4_Data);
+-int   LZ4_sizeofStreamState(void);
+-int   LZ4_resetStreamState(void* state, const char* inputBuffer);
+-char* LZ4_slideInputBuffer (void* state);
 +ZFASTEXTERN void* LZ4_create (const char* inputBuffer);
-+ZFASTEXTERN int   LZ4_compress_continue (void* LZ4_Data, const char* source, char* dest, int inputSize);
-+ZFASTEXTERN int   LZ4_compress_limitedOutput_continue (void* LZ4_Data, const char* source, char* dest, int inputSize, int maxOutputSize);
-+ZFASTEXTERN char* LZ4_slideInputBuffer (void* LZ4_Data);
-+ZFASTEXTERN int   LZ4_free (void* LZ4_Data);
++ZFASTEXTERN int   LZ4_sizeofStreamState(void);
++ZFASTEXTERN int   LZ4_resetStreamState(void* state, const char* inputBuffer);
++ZFASTEXTERN char* LZ4_slideInputBuffer (void* state);
  
- /*
- These functions allow the compression of dependent blocks, where each block benefits from prior 64 KB within preceding blocks.
-@@ -196,8 +217,8 @@
- */
- 
- 
--int LZ4_sizeofStreamState(void);
--int LZ4_resetStreamState(void* state, const char* inputBuffer);
-+ZFASTEXTERN int LZ4_sizeofStreamState(void);
-+ZFASTEXTERN int LZ4_resetStreamState(void* state, const char* inputBuffer);
- 
- /*
- These functions achieve the same result as :
-@@ -221,8 +242,8 @@
- */
- 
- 
--int LZ4_decompress_safe_withPrefix64k (const char* source, char* dest, int inputSize, int maxOutputSize);
--int LZ4_decompress_fast_withPrefix64k (const char* source, char* dest, int outputSize);
-+ZFASTEXTERN int LZ4_decompress_safe_withPrefix64k (const char* source, char* dest, int inputSize, int maxOutputSize);
-+ZFASTEXTERN int LZ4_decompress_fast_withPrefix64k (const char* source, char* dest, int outputSize);
- 
- /*
- *_withPrefix64k() :
-@@ -239,8 +260,8 @@
- These functions are deprecated and should no longer be used.
- They are provided here for compatibility with existing user programs.
- */
--int LZ4_uncompress (const char* source, char* dest, int outputSize);
--int LZ4_uncompress_unknownOutputSize (const char* source, char* dest, int isize, int maxOutputSize);
-+ZFASTEXTERN int LZ4_uncompress (const char* source, char* dest, int outputSize);
-+ZFASTEXTERN int LZ4_uncompress_unknownOutputSize (const char* source, char* dest, int isize, int maxOutputSize);
+ /* Obsolete streaming decoding functions */
+-int LZ4_decompress_safe_withPrefix64k (const char* source, char* dest, int compressedSize, int maxOutputSize);
+-int LZ4_decompress_fast_withPrefix64k (const char* source, char* dest, int originalSize);
++ZFASTEXTERN int LZ4_decompress_safe_withPrefix64k (const char* source, char* dest, int compressedSize, int maxOutputSize);
++ZFASTEXTERN int LZ4_decompress_fast_withPrefix64k (const char* source, char* dest, int originalSize);
  
  
  #if defined (__cplusplus)
