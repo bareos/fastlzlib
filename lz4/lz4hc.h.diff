@@ -1,5 +1,5 @@
---- lz4hc.h.orig	2014-06-27 12:59:48.060334808 +0200
-+++ lz4hc.h	2014-06-27 13:03:41.981259116 +0200
+--- lz4hc.h.orig	2015-04-03 20:03:29.459761616 +0200
++++ lz4hc.h	2015-04-03 20:05:19.708523320 +0200
 @@ -38,8 +38,23 @@
  extern "C" {
  #endif
@@ -47,7 +47,7 @@
      Recommended values are between 4 and 9, although any value between 0 and 16 will work.
 @@ -81,12 +96,12 @@
  /**************************************
-    Using an external allocation
+ *  Using an external allocation
  **************************************/
 -int LZ4_sizeofStateHC(void);
 -int LZ4_compressHC_withStateHC               (void* state, const char* source, char* dest, int inputSize);
@@ -63,18 +63,44 @@
  
  /*
  These functions are provided should you prefer to allocate memory for compression tables with your own allocation methods.
-@@ -105,14 +120,14 @@
-    Streaming Functions
- **************************************/
- /* Note : these streaming functions still follows the older model */
+@@ -124,8 +139,8 @@
+ */
+ 
+ 
+-LZ4_streamHC_t* LZ4_createStreamHC(void);
+-int             LZ4_freeStreamHC (LZ4_streamHC_t* LZ4_streamHCPtr);
++ZFASTEXTERN LZ4_streamHC_t* LZ4_createStreamHC(void);
++ZFASTEXTERN int             LZ4_freeStreamHC (LZ4_streamHC_t* LZ4_streamHCPtr);
+ /*
+ These functions create and release memory for LZ4 HC streaming state.
+ Newly created states are already initialized.
+@@ -134,13 +149,13 @@
+ to avoid size mismatch between different versions.
+ */
+ 
+-void LZ4_resetStreamHC (LZ4_streamHC_t* LZ4_streamHCPtr, int compressionLevel);
+-int  LZ4_loadDictHC (LZ4_streamHC_t* LZ4_streamHCPtr, const char* dictionary, int dictSize);
++ZFASTEXTERN void LZ4_resetStreamHC (LZ4_streamHC_t* LZ4_streamHCPtr, int compressionLevel);
++ZFASTEXTERN int  LZ4_loadDictHC (LZ4_streamHC_t* LZ4_streamHCPtr, const char* dictionary, int dictSize);
+ 
+-int LZ4_compressHC_continue (LZ4_streamHC_t* LZ4_streamHCPtr, const char* source, char* dest, int inputSize);
+-int LZ4_compressHC_limitedOutput_continue (LZ4_streamHC_t* LZ4_streamHCPtr, const char* source, char* dest, int inputSize, int maxOutputSize);
++ZFASTEXTERN int LZ4_compressHC_continue (LZ4_streamHC_t* LZ4_streamHCPtr, const char* source, char* dest, int inputSize);
++ZFASTEXTERN int LZ4_compressHC_limitedOutput_continue (LZ4_streamHC_t* LZ4_streamHCPtr, const char* source, char* dest, int inputSize, int maxOutputSize);
+ 
+-int LZ4_saveDictHC (LZ4_streamHC_t* LZ4_streamHCPtr, char* safeBuffer, int maxDictSize);
++ZFASTEXTERN int LZ4_saveDictHC (LZ4_streamHC_t* LZ4_streamHCPtr, char* safeBuffer, int maxDictSize);
+ 
+ /*
+ These functions compress data in successive blocks of any size, using previous blocks as dictionary.
+@@ -164,15 +179,15 @@
+  * Deprecated Streaming Functions
+  * ************************************/
+ /* Note : these streaming functions follows the older model, and should no longer be used */
 -void* LZ4_createHC (const char* inputBuffer);
--int   LZ4_compressHC_continue (void* LZ4HC_Data, const char* source, char* dest, int inputSize);
--int   LZ4_compressHC_limitedOutput_continue (void* LZ4HC_Data, const char* source, char* dest, int inputSize, int maxOutputSize);
 -char* LZ4_slideInputBufferHC (void* LZ4HC_Data);
 -int   LZ4_freeHC (void* LZ4HC_Data);
 +ZFASTEXTERN void* LZ4_createHC (const char* inputBuffer);
-+ZFASTEXTERN int   LZ4_compressHC_continue (void* LZ4HC_Data, const char* source, char* dest, int inputSize);
-+ZFASTEXTERN int   LZ4_compressHC_limitedOutput_continue (void* LZ4HC_Data, const char* source, char* dest, int inputSize, int maxOutputSize);
 +ZFASTEXTERN char* LZ4_slideInputBufferHC (void* LZ4HC_Data);
 +ZFASTEXTERN int   LZ4_freeHC (void* LZ4HC_Data);
  
@@ -83,16 +109,10 @@
 +ZFASTEXTERN int   LZ4_compressHC2_continue (void* LZ4HC_Data, const char* source, char* dest, int inputSize, int compressionLevel);
 +ZFASTEXTERN int   LZ4_compressHC2_limitedOutput_continue (void* LZ4HC_Data, const char* source, char* dest, int inputSize, int maxOutputSize, int compressionLevel);
  
- /*
- These functions allow the compression of dependent blocks, where each block benefits from prior 64 KB within preceding blocks.
-@@ -143,8 +158,8 @@
- When compression is completed, a call to LZ4_freeHC() will release the memory used by the LZ4HC Data Structure.
- */
+-int   LZ4_sizeofStreamStateHC(void);
+-int   LZ4_resetStreamStateHC(void* state, const char* inputBuffer);
++ZFASTEXTERN int   LZ4_sizeofStreamStateHC(void);
++ZFASTEXTERN int   LZ4_resetStreamStateHC(void* state, const char* inputBuffer);
  
--int LZ4_sizeofStreamStateHC(void);
--int LZ4_resetStreamStateHC(void* state, const char* inputBuffer);
-+ZFASTEXTERN int LZ4_sizeofStreamStateHC(void);
-+ZFASTEXTERN int LZ4_resetStreamStateHC(void* state, const char* inputBuffer);
  
- /*
- These functions achieve the same result as :
+ #if defined (__cplusplus)
